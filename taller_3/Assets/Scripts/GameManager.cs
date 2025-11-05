@@ -57,6 +57,49 @@ public class GameManager : MonoBehaviour
         tiempoTranscurrido += Time.deltaTime;
         if (textoTiempo != null)
             textoTiempo.text = "Tiempo: " + tiempoTranscurrido.ToString("F1") + "s";
+
+        // 🔥 AQUÍ ESTÁ LA MAGIA: Comprobación automática de nivel completado
+        ComprobarCondicionesNivel();
+    }
+
+    private void ComprobarCondicionesNivel()
+    {
+        string escenaActual = SceneManager.GetActiveScene().name;
+
+        // Solo en SceneFuego queremos pasar a SceneHielo
+        if (escenaActual == "SceneFuego")
+        {
+            if (puntaje >= 80 && colisiones < 1 && juegoActivo)
+            {
+                juegoActivo = false; // Evita que se llame varias veces
+                StartCoroutine(PasarAlSiguienteNivel("SceneHielo", "¡Nivel completado!\nPasando al mundo de hielo..."));
+            }
+        }
+        // En SceneHielo pasamos al Final
+        else if (escenaActual == "SceneHielo")
+        {
+            if (puntaje >= 100 && colisiones < 3 && juegoActivo) // Cambia 100 por los puntos que quieras
+            {
+                juegoActivo = false;
+                StartCoroutine(PasarAlSiguienteNivel("Final", "¡Genial! Has completado el juego."));
+            }
+        }
+    }
+
+    private IEnumerator PasarAlSiguienteNivel(string siguienteEscena, string mensaje)
+    {
+        Time.timeScale = 0f;
+        if (panelNegro != null) panelNegro.SetActive(true);
+        if (textoMensaje != null)
+        {
+            textoMensaje.gameObject.SetActive(true);
+            textoMensaje.text = mensaje;
+        }
+
+        yield return new WaitForSecondsRealtime(3f); // 3 segundos de gloria
+
+        Time.timeScale = 1f;
+        SceneManager.LoadScene(siguienteEscena);
     }
 
     public void AgregarPuntaje(int cantidad)
