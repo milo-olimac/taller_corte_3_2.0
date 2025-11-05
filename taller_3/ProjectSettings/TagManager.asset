@@ -15,6 +15,7 @@ TagManager:
   - Corazon
   - TextoTiempo
   - TextoMensaje
+  - Ice
   layers:
   - Default
   - TransparentFX
