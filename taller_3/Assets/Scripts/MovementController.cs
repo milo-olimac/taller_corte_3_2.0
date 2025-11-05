@@ -94,7 +94,7 @@ private void OnTriggerEnter(Collider other)
         if (gameManager != null)
         {
             Debug.Log("Jugador llego al WinZone, verificando condiciones...");
-            gameManager.CargarSiguienteEscena();
+            //gameManager.CargarSiguienteEscena();
         }
     }
 }
