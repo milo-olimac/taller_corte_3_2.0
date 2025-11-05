@@ -67,10 +67,14 @@ public class Movement : MonoBehaviour
     }
 
     if (collision.gameObject.tag == "DeathZone")
+{
+    GameManager gameManager = Object.FindFirstObjectByType<GameManager>();
+    if (gameManager != null)
     {
-        transform.position = SpawnPoint.position;
-        salud -= 1;
+        gameManager.ReiniciarNivel();
     }
+}
+
 }
 
 public void OnCollisionExit(Collision collision)
@@ -86,10 +90,10 @@ private void OnTriggerEnter(Collider other)
 {
     if (other.CompareTag("WinZone"))
     {
-        Debug.Log("Entró al WinZone");
         GameManager gameManager = Object.FindFirstObjectByType<GameManager>();
         if (gameManager != null)
         {
+            Debug.Log("Jugador llego al WinZone, verificando condiciones...");
             gameManager.CargarSiguienteEscena();
         }
     }

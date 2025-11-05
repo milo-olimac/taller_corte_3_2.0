@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
+using System.Collections;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -9,13 +11,21 @@ public class GameManager : MonoBehaviour
     [Header("Interfaz de Usuario")]
     public TextMeshProUGUI textoPuntaje;
     public TextMeshProUGUI textoTiempo;
+    public TextMeshProUGUI textoColisiones;
     public GameObject[] corazones;
+
+    [Header("Pantalla de Mensaje")]
+    public GameObject panelNegro;
+    public TextMeshProUGUI textoMensaje;
 
     [Header("Estadisticas Globales")]
     public int puntaje = 0;
     public int vidas = 3;
     public int colisiones = 0;
     private float tiempoTranscurrido = 0f;
+
+    [Header("Limites")]
+    public int maxColisionesAntesReinicio = 3;
 
     [Header("Control")]
     public bool juegoActivo = true;
@@ -26,6 +36,7 @@ public class GameManager : MonoBehaviour
         {
             instancia = this;
             DontDestroyOnLoad(gameObject);
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else
         {
@@ -52,69 +63,164 @@ public class GameManager : MonoBehaviour
     {
         puntaje += cantidad;
         ActualizarUI();
-
-        if (puntaje >= 80 && colisiones < 3 && SceneManager.GetActiveScene().name == "Fuego")
-        {
-            CargarSiguienteEscena();
-        }
     }
 
-    public void PerderVida()
+ public void PerderVida()
+{
+    colisiones++;
+
+    if (colisiones >= 3)
     {
-        if (vidas <= 0) return;
-
-        vidas--;
-        colisiones++;
-
-        if (corazones != null && vidas >= 0 && vidas < corazones.Length)
-            corazones[vidas].SetActive(false);
-
-        if (vidas == 0)
-        {
-            FinDelJuego();
-        }
-        ActualizarUI();
+        ReiniciarNivel();
+        return;
     }
+
+    if (vidas > 0)
+    {
+        vidas--;
+
+        // Cambia el color del corazon perdido
+        if (corazones != null && vidas >= 0 && vidas < corazones.Length)
+        {
+            Image imagen = corazones[vidas].GetComponent<Image>();
+            if (imagen != null)
+            {
+                imagen.color = Color.black; // cambia a negro los ♥
+            }
+        }
+    }
+
+    ActualizarUI();
+}
+
+
 
     void ActualizarUI()
     {
         if (textoPuntaje != null)
             textoPuntaje.text = "Puntos: " + puntaje;
+
+        if (textoColisiones != null)
+            textoColisiones.text = "Colisiones: " + colisiones;
     }
 
-   public void CargarSiguienteEscena()
+    public void CargarSiguienteEscena()
+    {
+        string escenaActual = SceneManager.GetActiveScene().name;
+
+        if (escenaActual == "SceneFuego")
+        {
+            if (puntaje >= 80 && colisiones < 3)
+            {
+                SceneManager.LoadScene("SceneHielo");
+            }
+            else
+            {
+                StartCoroutine(MostrarMensajeYPausar("Necesitas al menos 80 puntos y menos de 3 colisiones", 4f, escenaActual));
+            }
+        }
+        else if (escenaActual == "SceneHielo")
+        {
+            SceneManager.LoadScene("Final");
+        }
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 {
-    string escenaActual = SceneManager.GetActiveScene().name;
-    Debug.Log("Cambiando desde: " + escenaActual);
+    // Reasignar textos
+    textoPuntaje = GameObject.FindWithTag("TextoPuntaje")?.GetComponent<TextMeshProUGUI>();
+    textoTiempo = GameObject.FindWithTag("TextoTiempo")?.GetComponent<TextMeshProUGUI>();
+    textoColisiones = GameObject.FindWithTag("TextoColisiones")?.GetComponent<TextMeshProUGUI>();
+    textoMensaje = GameObject.FindWithTag("TextoMensaje")?.GetComponent<TextMeshProUGUI>();
 
-    if (escenaActual == "SceneFuego")
+    // Reasignar panel negro
+    GameObject panel = GameObject.FindWithTag("PanelNegro");
+    if (panel != null)
+        panelNegro = panel;
+
+    // Busca los nuevos ♥ en la escena
+    GameObject[] encontrados = GameObject.FindGameObjectsWithTag("Corazon");
+    if (encontrados.Length > 0)
     {
-        SceneManager.LoadScene("SceneHielo");
-        Debug.Log("Cargando SceneHielo");
+        corazones = encontrados;
+
+        // Restaurar el color de todos los ♥
+        foreach (GameObject c in corazones)
+        {
+            if (c != null)
+            {
+                Image img = c.GetComponent<Image>();
+                if (img != null)
+                    img.color = Color.white;
+            }
+        }
     }
-    else if (escenaActual == "SceneHielo")
-    {
-        SceneManager.LoadScene("Final");
-        Debug.Log("Cargando Final");
-    }
+
+    ActualizarUI();
+    juegoActivo = true;
+    Time.timeScale = 1f;
 }
 
 
 
+    private IEnumerator MostrarMensajeYPausar(string mensaje, float duracion, string escenaReiniciar)
+    {
+        juegoActivo = false;
+        Time.timeScale = 0f; // pausa todo para el mensajito
+
+        if (panelNegro != null) panelNegro.SetActive(true);
+        if (textoMensaje != null)
+        {
+            textoMensaje.gameObject.SetActive(true);
+            textoMensaje.text = mensaje;
+        }
+
+        float tiempoReal = 0f;
+        while (tiempoReal < duracion)
+        {
+            tiempoReal += Time.unscaledDeltaTime; // usa tiempo real, este no se ve afectado por la pausa
+            yield return null;
+        }
+
+        Time.timeScale = 1f; // reanuda la esceneeee
+        SceneManager.LoadScene(escenaReiniciar);
+        juegoActivo = true;
+        Time.timeScale = 1f;
+    }
+
     public void FinDelJuego()
     {
         juegoActivo = false;
-        Debug.Log("Fin del juego: sin vidas restantes");
         SceneManager.LoadScene("GameOver");
     }
 
-    public void ReiniciarJuego()
+    public void ReiniciarNivel()
+{
+    puntaje = 0;
+    vidas = 3;
+    colisiones = 0;
+    tiempoTranscurrido = 0f;
+
+    ActualizarUI();
+    Scene escenaActual = SceneManager.GetActiveScene();
+    SceneManager.LoadScene(escenaActual.name);
+    
+    if (corazones != null)
+{
+    foreach (GameObject corazon in corazones)
     {
-        puntaje = 0;
-        vidas = 3;
-        colisiones = 0;
-        tiempoTranscurrido = 0f;
-        juegoActivo = true;
-        ActualizarUI();
+        if (corazon != null)
+        {
+            Image img = corazon.GetComponent<Image>();
+            if (img != null)
+            {
+                img.color = Color.white; // restaura el color del ♥
+            }
+        }
     }
+}
+
+}
+
+
 }
