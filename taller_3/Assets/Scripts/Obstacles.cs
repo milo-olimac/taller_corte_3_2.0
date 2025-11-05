@@ -17,6 +17,7 @@ public class NPCPatrol : MonoBehaviour
     private bool puedeEmpujar = true;
     private GameManager gameManager;
 
+    [System.Obsolete]
     private void Start()
     {
         gameManager = FindObjectOfType<GameManager>();
@@ -30,7 +31,6 @@ public class NPCPatrol : MonoBehaviour
         Patrullar();
     }
 
-    // ---------------------- MOVIMIENTO ENTRE WAYPOINTS ----------------------
     private void Patrullar()
     {
         if (waypoints.Length == 0) return;
@@ -42,7 +42,6 @@ public class NPCPatrol : MonoBehaviour
         if (distancia > stoppingDistance)
         {
             direccion.Normalize();
-            //transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direccion), Time.deltaTime * 5f);
             transform.position += direccion * speed * Time.deltaTime;
         }
         else
@@ -51,30 +50,24 @@ public class NPCPatrol : MonoBehaviour
         }
     }
 
-    // ---------------------- COLISIÓN CON EL JUGADOR ----------------------
     private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log("NPC colisionó con: " + collision.collider.name);
-        if (!puedeEmpujar) return; // evita repetición inmediata
+        if (!puedeEmpujar) return;
 
-        if (collision.gameObject.tag == "Player")
+        if (collision.gameObject.tag == playerTag)
         {
             Rigidbody rbJugador = collision.collider.GetComponent<Rigidbody>();
-            Debug.Log("Rigidbody del jugador encontrado: " + (rbJugador != null));
             if (rbJugador != null)
             {
-                // Calcular dirección opuesta + impulso hacia arriba
                 Vector3 direccionEmpuje = (collision.transform.position - transform.position).normalized;
-                direccionEmpuje.y = 0.5f; // pequeño impulso vertical
+                direccionEmpuje.y = 0.5f;
                 Vector3 fuerzaTotal = direccionEmpuje.normalized * fuerzaEmpuje + Vector3.up * fuerzaVertical;
 
                 rbJugador.AddForce(fuerzaTotal, ForceMode.Impulse);
-                Debug.Log("NPC empujó al jugador con fuerza: " + fuerzaTotal);
             }
 
-            // Si este objeto tiene el tag "Obstacle", resta puntos
             if (CompareTag(obstacleTag) && gameManager != null)
-                gameManager.RestarPuntos(1);
+                gameManager.PerderVida();
 
             StartCoroutine(EsperarParaEmpujar());
         }
