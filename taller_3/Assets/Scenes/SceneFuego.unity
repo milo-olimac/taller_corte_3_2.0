@@ -21224,61 +21224,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 778499872}
   m_LocalEulerAnglesHint: {x: -7.252, y: 359.882, z: -10.589}
---- !u!1 &600454370
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 600454372}
-  - component: {fileID: 600454371}
-  m_Layer: 0
-  m_Name: GameObject
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &600454371
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 600454370}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: be91976b04859ef4a918f908fcb20bba, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::GameManager
-  textoPuntaje: {fileID: 0}
-  textoTiempo: {fileID: 0}
-  textoColisiones: {fileID: 0}
-  corazones: []
-  panelNegro: {fileID: 0}
-  textoMensaje: {fileID: 0}
-  puntaje: 0
-  vidas: 3
-  colisiones: 0
-  maxColisionesAntesReinicio: 3
-  juegoActivo: 1
---- !u!4 &600454372
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 600454370}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.4134, y: -4.93356, z: -1.49847}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &601211904
 GameObject:
   m_ObjectHideFlags: 0
@@ -42899,7 +42844,6 @@ SceneRoots:
   - {fileID: 2068606570}
   - {fileID: 1668988565}
   - {fileID: 778499872}
-  - {fileID: 600454372}
   - {fileID: 463012713881067173}
   - {fileID: 2157437323404538180}
   - {fileID: 479427039}
